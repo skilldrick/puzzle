@@ -17,6 +17,8 @@ function layOutDay(events) {
   if (!_.isArray(events)) {
     throw new TypeError('Events must be an array');
   }
+  events = sortByStartAndEnd(events);
+
 }
 
 /**
@@ -35,4 +37,25 @@ function isEvent(event) {
   return event &&
     (typeof event.start == 'number') &&
     (typeof event.end == 'number');
+}
+
+//Sort by start, using end to resolve ties
+function sortByStartAndEnd(events) {
+  return events.sort(function (event1, event2) {
+    if (event1.start < event2.start) {
+      return -1;
+    }
+    else if (event2.start < event1.start) {
+      return 1;
+    }
+    else if (event1.end < event2.end) {
+      return -1;
+    }
+    else if (event2.end < event1.end) {
+      return 1;
+    }
+    else {
+      return 0;
+    }
+  });
 }
