@@ -4,6 +4,16 @@ describe('layOutDay', function () {
       layOutDay();
     }).toThrow('Events must be an array');
   });
+
+  it('does something', function () {
+    var events = [
+      {id: 0, start: 10, end: 40},
+      {id: 1, start: 20, end: 50},
+      {id: 2, start: 30, end: 50},
+      {id: 3, start: 40, end: 70}
+    ];
+    layOutDay(events);
+  });
 });
 
 describe('collision', function () {

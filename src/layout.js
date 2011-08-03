@@ -19,6 +19,37 @@ function layOutDay(events) {
   }
   events = sortByStartAndEnd(events);
 
+  //initialise each event's collidesWith array
+  _.each(events, function (event) {
+    event.collidesWith = [];
+  });
+
+  var organised = [];
+  _.each(events, function (event, idx) {
+    event.widthDivisor = 1;
+    var prevEvents = _.first(events, idx);
+    _.each(prevEvents, function (prevEvent) {
+      if (collision(prevEvent, event)) {
+        prevEvent.collidesWith.push(event);
+        event.collidesWith.push(prevEvent);
+      }
+    });
+  });
+  console.log(events);
+
+  //
+  //xxx
+  //xxx xxx
+  //xxx xxx xxx
+  //        xxx xxx <- This can go under the first element
+  //            xxx
+  //
+  //xxx
+  //xxx xxx
+  //xxx xxx xxx
+  //xxx     xxx 
+  //xxx         
+  //
 }
 
 /**
