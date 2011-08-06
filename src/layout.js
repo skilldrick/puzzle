@@ -18,7 +18,7 @@ function layOutDay(rawEvents) {
     throw new TypeError('Events must be an array');
   }
 
-  // create event objects
+  // create intelligent event objects
   var events = _.map(rawEvents, EventMaker);
   events = sortByStartAndEnd(events);
 
@@ -110,10 +110,12 @@ function EventMaker(rawEvent) {
 
     end: rawEvent.end,
 
-    widthFactor: 1,
+    id: rawEvent.id,
+
+    widthDivisor: 1, //1: full width, 2: half-width, etc.
 
     width: function () {
-      return Math.floor(600 * (1 / this.widthFactor));
+      return Math.floor(600 * (1 / this.widthDivisor));
     },
 
     order: 0, //horizontal ordinal position
@@ -150,13 +152,13 @@ function EventMaker(rawEvent) {
     //This and all previous colliders should have the same width
     setWidthToColliders: function () {
       if (this.previousColliders.length > 0) {
-        this.widthFactor = this.previousColliders[0].widthFactor;
+        this.widthDivisor = this.previousColliders[0].widthDivisor;
       }
     },
 
     //Try out each order and return true if one fits
     tryToFit: function () {
-      for (order = 0; order < this.widthFactor; order++) {
+      for (order = 0; order < this.widthDivisor; order++) {
         this.order = order;
         if (this.fits()) {
           return true;
@@ -166,16 +168,16 @@ function EventMaker(rawEvent) {
       return false;
     },
 
-    //Increase widthFactor for all events in collidingGroup
+    //Increase widthDivisor for all events in collidingGroup
     reduceWidthOfGroup: function () {
       _.each(this.collidingGroup(), function (event) {
-        event.widthFactor += 1;
+        event.widthDivisor += 1;
       });
     },
 
     //This is called on each event. It tries all the possible
     //locations for the event until one fits. Order always starts
-    //at 0, and widthFactor at 1, so we can make certain assumptions
+    //at 0, and widthDivisor at 1, so we can make certain assumptions
     findCorrectLocation: function () {
       //event's width should match its colliders
       this.setWidthToColliders();

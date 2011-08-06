@@ -20,10 +20,10 @@ describe('layOutDay', function () {
 describe('spaceCollision', function () {
   it('returns false if events only collide by time', function () {
     var ev1 = EventMaker({ start: 0, end: 100});
-    ev1.widthFactor = 2;
+    ev1.widthDivisor = 2;
     var ev2 = EventMaker({ start: 50, end: 150});
     ev2.order = 1;
-    ev2.widthFactor = 2;
+    ev2.widthDivisor = 2;
     expect(spaceCollision(ev1, ev2)).toBeFalsy();
   });
 
@@ -31,7 +31,7 @@ describe('spaceCollision', function () {
     var ev1 = EventMaker({ start: 0, end: 100});
     var ev2 = EventMaker({ start: 50, end: 150});
     ev2.order = 1;
-    ev2.widthFactor = 2;
+    ev2.widthDivisor = 2;
     expect(spaceCollision(ev1, ev2)).toBeTruthy();
   });
 });
