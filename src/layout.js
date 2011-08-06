@@ -38,7 +38,7 @@ function render(events) {
   _.each(events, function (event) {
     var $ev = $('<div class="event" />');
     $ev.css({
-      height: event.end - event.start,
+      height: (event.end - event.start) - 2,
       width: event.width - 5,
       top: event.start,
       left: event.left + 10
