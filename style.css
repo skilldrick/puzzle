@@ -23,7 +23,7 @@ body {
   float: left;
 }
 
-#calendarTimes ul {
+#calendarTimes ol {
   margin: 0;
   padding: 0;
   list-style: none;
