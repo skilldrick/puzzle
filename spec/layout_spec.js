@@ -5,15 +5,24 @@ describe('layOutDay', function () {
     }).toThrow('Events must be an array');
   });
 
-  it('does something', function () {
+  it('gives correct width and left values to events', function () {
     var events = [
-      {id: 0, start: 10, end: 40},
-      {id: 1, start: 20, end: 50},
-      {id: 2, start: 30, end: 50},
-      {id: 3, start: 40, end: 70},
-      {id: 4, start: 60, end: 80}
+      { id: 0, start: 10, end: 40 },
+      { id: 1, start: 20, end: 50 },
+      { id: 2, start: 30, end: 50 },
+      { id: 3, start: 40, end: 70 },
+      { id: 4, start: 60, end: 80 },
+      { id: 5, start: 80, end: 90 }
     ];
-    layOutDay(events);
+    var expected = [
+      { id: 0, width: 200, left: 0, start: 10, end: 40 },
+      { id: 1, width: 200, left: 200, start: 20, end: 50 },
+      { id: 2, width: 200, left: 400, start: 30, end: 50 },
+      { id: 3, width: 200, left: 0, start: 40, end: 70 },
+      { id: 4, width: 200, left: 200, start: 60, end: 80 },
+      { id: 5, width: 600, left: 0, start: 80, end: 90 }
+    ];
+    expect(layOutDay(events)).toEqual(expected);
   });
 });
 
@@ -101,5 +110,15 @@ describe('sortByStartAndEnd', function () {
     ];
 
     expect(sortByStartAndEnd(unsorted)).toEqual(expectedSorted);
+  });
+});
+
+describe('EventMaker', function () {
+  it('preserves start, end and id', function () {
+    var rawEvent = { start: 10, end: 20, id: 2 };
+    var event = EventMaker(rawEvent);
+    expect(event.start).toEqual(rawEvent.start);
+    expect(event.end).toEqual(rawEvent.end);
+    expect(event.id).toEqual(rawEvent.id);
   });
 });
