@@ -47,7 +47,6 @@ describe('Event#collidingGroup', function () {
     var events = _.map(rawEvents, EventMaker);
     setCollidesWith(events);
     var colliders = events[3].collidingGroup();
-    console.log(colliders);
     expect(colliders.length).toEqual(3);
   });
 });

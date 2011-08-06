@@ -17,79 +17,17 @@ function layOutDay(rawEvents) {
   if (!_.isArray(rawEvents)) {
     throw new TypeError('Events must be an array');
   }
-  rawEvents = sortByStartAndEnd(rawEvents);
 
   // create event objects
   var events = _.map(rawEvents, EventMaker);
+  events = sortByStartAndEnd(events);
 
   //Tell each event which earlier events it collides with
   setCollidesWith(events);
 
-  _.each(events, function (event, idx) {
-    if (idx === 0) {
-      return;
-    }
+  _.invoke(events, 'findCorrectLocation');
 
-    //event's width should match its colliders
-    if (event.collidesWith.length > 0) {
-      event.widthFactor = event.collidesWith[0].widthFactor;
-    }
-    //if event fits
-    if (! event.willCollideInSpace()) {
-      return;
-    }
-    //otherwise
-    //check if it fits at any other order
-    var itFits = _.any(_.range(event.widthFactor - 1), function (order) {
-      event.order = order;
-      return _.all(event.collidesWith, function (other) {
-        //at this order it fits!
-        return ! spaceCollision(event, other);
-      });
-    });
-    
-    if (itFits) {
-      return;
-    }
-    //otherwise:
-    //go through each event in colliding group and reduce its size
-    _.each(event.collidingGroup(), function (event) {
-      event.widthFactor += 1;
-    });
-
-    itFits = _.any(_.range(event.widthFactor), function (order) {
-      event.order = order;
-      return _.all(event.collidesWith, function (other) {
-        //at this order it fits!
-        return ! spaceCollision(event, other);
-      });
-    });
-    
-    if (itFits) {
-      return;
-    }
-
-    throw "Shouldn't get here!";
-
-  });
-
-
-  console.log(events);
   return events;
-
-  //
-  //xxx
-  //xxx xxx
-  //xxx xxx xxx
-  //        xxx xxx <- This can go under the first element
-  //            xxx
-  //
-  //xxx
-  //xxx xxx
-  //xxx xxx xxx
-  //xxx     xxx 
-  //xxx         
-  //
 }
 
 function render(events) {
@@ -115,7 +53,7 @@ function setCollidesWith(events) {
 
     _.each(prevEvents, function (prevEvent) {
       if (timeCollision(prevEvent, event)) {
-        event.collidesWith.push(prevEvent);
+        event.previousColliders.push(prevEvent);
       }
     });
   });
@@ -169,31 +107,91 @@ function sortByStartAndEnd(events) {
 function EventMaker(rawEvent) {
   return {
     start: rawEvent.start,
+
     end: rawEvent.end,
+
     widthFactor: 1,
+
     width: function () {
       return Math.floor(600 * (1 / this.widthFactor));
     },
+
     order: 0, //horizontal ordinal position
+
     left: function () {
       return this.width() * this.order;
     },
+
     right: function () {
       return this.left() + this.width();
     },
-    collidesWith: [],
-    willCollideInSpace: function () { //will collide in space
-      return _.any(this.collidesWith, function (other) {
-        return spaceCollision(this, other);
+
+    //These are the previous events this event collides with in time
+    previousColliders: [],
+
+    fits: function () {
+      return _.all(this.previousColliders, function (other) {
+        return !spaceCollision(this, other);
       }, this);
     },
+
+    //These are the events that (a) this event collides with in time
+    //and (b) the colliders collide with. All events in a colliding
+    //group should be the same width
     collidingGroup: function () {
-      var allColliders = _.map(this.collidesWith, function (item) {
+      var allColliders = _.map(this.previousColliders, function (item) {
         return item.collidingGroup();
       });
       allColliders = _(allColliders).chain().flatten().uniq().value();
       allColliders.push(this);
       return allColliders;
+    },
+
+    //This and all previous colliders should have the same width
+    setWidthToColliders: function () {
+      if (this.previousColliders.length > 0) {
+        this.widthFactor = this.previousColliders[0].widthFactor;
+      }
+    },
+
+    //Try out each order and return true if one fits
+    tryToFit: function () {
+      for (order = 0; order < this.widthFactor; order++) {
+        this.order = order;
+        if (this.fits()) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+
+    //Increase widthFactor for all events in collidingGroup
+    reduceWidthOfGroup: function () {
+      _.each(this.collidingGroup(), function (event) {
+        event.widthFactor += 1;
+      });
+    },
+
+    //This is called on each event. It tries all the possible
+    //locations for the event until one fits. Order always starts
+    //at 0, and widthFactor at 1, so we can make certain assumptions
+    findCorrectLocation: function () {
+      //event's width should match its colliders
+      this.setWidthToColliders();
+
+      if (this.tryToFit()) {
+        return;
+      }
+
+      //If we get here, the event must be too wide.
+      this.reduceWidthOfGroup();
+
+      if (this.tryToFit()) {
+        return;
+      }
+
+      throw "Shouldn't get here!";
     }
   };
 }
