@@ -1,5 +1,5 @@
 /**
-Lays out events for a single  day
+Lays out events for a single day
  
 @param array  events  
 An array of event objects. Each event object consists of a start
@@ -10,29 +10,29 @@ time will be less than the end time.  The array is not sorted.
 @return array
 An array of event objects that has the width, the left and top
 positions set, In addition to start time, end time, and id. 
- 
-**/
 
-function layOutDay(rawEvents) {
-  /*
   This algorithm works like so:
   1. Put the events in order
   2. Give each event a list of earlier events it collides with in time
   3. Tell each event to find its correct location
     a) Set the event's width to the width of its colliders
     b) Try the event in all possible horizontal locations. If it fits,
-    leave it there
+       leave it there
     c) If it doesn't fit in any, reduce the width of this event and
-    all previous events it collides with (and the events that those
-    events collide with, recursively), then do b) again
+       all previous events it collides with (and the events that those
+       events collide with, recursively), then do b) again
   
   The width and left edge of each event is calculated lazily from the
   order and widthDivisor of that event. The order is the 'column' the
   event is in, and the widthDivisor is the proportion of the full
   width. Because all events in a colliding group have the same width, we
   don't have to recalculate the width and left edge each time the
-  number of events in a row changes.
-  */
+  number of events in a row changes - the width and left values
+  are fully described by the order and widthDivisor values.
+ 
+**/
+
+function layOutDay(rawEvents) {
   if (!_.isArray(rawEvents)) {
     throw new TypeError('Events must be an array');
   }
@@ -53,19 +53,23 @@ function layOutDay(rawEvents) {
 }
 
 function render(events) {
-  $calendar = $('#calendar');
+  var eventHtml = [
+    '<div class="event">',
+    '<p class="title">Sample Item</p>',
+    '<p class="location">Sample Location</p>',
+    '</div>'
+  ].join('\n');
+
+  var $calendar = $('#calendar');
   $calendar.empty();
+
   _.each(events, function (event) {
-    var $ev = $('<div class="event" />');
-    $ev.css({
+    $(eventHtml).css({
       height: (event.end - event.start) - 2,
       width: event.width - 5,
       top: event.start,
       left: event.left + 10
-    });
-    $ev.append('<p class="title">Sample Item</p>');
-    $ev.append('<p class="location">Sample Location</p>');
-    $calendar.append($ev);
+    }).appendTo($calendar);
   });
 }
 
@@ -131,20 +135,20 @@ function sortByStartAndEnd(events) {
 }
 
 function EventMaker(rawEvent) {
+  var CALENDAR_WIDTH = 600;
+
   return {
     start: rawEvent.start,
-
     end: rawEvent.end,
-
     id: rawEvent.id,
-
     widthDivisor: 1, //1: full width, 2: half-width, etc.
+    order: 0, //horizontal ordinal position
+    //These are the previous events this event collides with in time
+    previousColliders: [],
 
     width: function () {
-      return Math.floor(600 * (1 / this.widthDivisor));
+      return Math.floor(CALENDAR_WIDTH * (1 / this.widthDivisor));
     },
-
-    order: 0, //horizontal ordinal position
 
     left: function () {
       return this.width() * this.order;
@@ -153,9 +157,6 @@ function EventMaker(rawEvent) {
     right: function () {
       return this.left() + this.width();
     },
-
-    //These are the previous events this event collides with in time
-    previousColliders: [],
 
     fits: function () {
       return _.all(this.previousColliders, function (other) {
