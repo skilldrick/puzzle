@@ -4,21 +4,9 @@
     <script src='lib/underscore.js'></script>
     <script src='lib/jquery-1.6.2.js'></script>
     <script src='src/layout.js'></script>
+    <script src='src/testing.js'></script>
+    <link rel='stylesheet' type='text/css' href='style.css'>
   </head>
-  <link rel='stylesheet' type='text/css' href='style.css'>
-
-  <script>
-    $(document).ready(function () {
-      var events = [
-        {id: 0, start: 30, end: 150},
-        {id: 1, start: 540, end: 600},
-        {id: 2, start: 560, end: 620},
-        {id: 3, start: 610, end: 670}
-      ];
-
-      render(layOutDay(events));
-    });
-  </script>
 
   <body>
     <div id='header'></div>
@@ -54,6 +42,9 @@
         </ul>
       </div>
       <div id='calendar'>
+      </div>
+
+      <div id='testing'>
       </div>
     </div>
 

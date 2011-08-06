@@ -2,14 +2,14 @@
 Lays out events for a single  day
  
 @param array  events  
-An array of event objects. Each event object consists of a start time,
-end time (measured in minutes) from 9am, as well as a unique id. The
-start and end time of each event will be [0, 720]. The start time will
-be less than the end time.  The array is not sorted.
+An array of event objects. Each event object consists of a start
+time, end time (measured in minutes) from 9am, as well as a unique
+id. The start and end time of each event will be [0, 720]. The start
+time will be less than the end time.  The array is not sorted.
  
 @return array
-An array of event objects that has the width, the left and top positions
-set, In addition to start time, end time, and id. 
+An array of event objects that has the width, the left and top
+positions set, In addition to start time, end time, and id. 
  
 **/
 
@@ -18,16 +18,18 @@ function layOutDay(rawEvents) {
     throw new TypeError('Events must be an array');
   }
 
-  // create intelligent event objects
+  //create intelligent event objects
   var events = _.map(rawEvents, EventMaker);
+  //and sort them
   events = sortByStartAndEnd(events);
 
   //Tell each event which earlier events it collides with
   setCollidesWith(events);
 
+  //Tell each event to find its correct location
   _.invoke(events, 'findCorrectLocation');
 
-  return events;
+  return _.map(events, eventSimplifier);
 }
 
 function render(events) {
@@ -37,9 +39,9 @@ function render(events) {
     var $ev = $('<div class="event" />');
     $ev.css({
       height: event.end - event.start,
-      width: event.width() - 5,
+      width: event.width - 5,
       top: event.start,
-      left: event.left() + 10
+      left: event.left + 10
     });
     $ev.append('<p class="title">Sample Item</p>');
     $ev.append('<p class="location">Sample Location</p>');
@@ -50,6 +52,17 @@ function render(events) {
 /**
 Helper functions
 **/
+
+//Turn an intelligent event object into a simple hash
+function eventSimplifier(event) {
+  return {
+    width: event.width(),
+    left: event.left(),
+    start: event.start,
+    end: event.end,
+    id: event.id
+  };
+}
 
 function setCollidesWith(events) {
   _.each(events, function (event, idx) {
