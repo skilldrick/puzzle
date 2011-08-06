@@ -5,33 +5,10 @@
     <script src='lib/jquery-1.6.2.js'></script>
     <script src='src/layout.js'></script>
   </head>
-  <style>
-    #calendar {
-      width: 620px;
-      height: 720px;
-      background-color: #ccc;
-      position: relative;
-    }
-
-    .event {
-      background-color: white;
-      position: absolute;
-      border: 1px solid gray;
-      border-left: 5px solid blue;
-    }
-  </style>
+  <link rel='stylesheet' type='text/css' href='style.css'>
 
   <script>
     $(document).ready(function () {
-      var complexEvents = [
-        {id: 0, start: 10, end: 40},
-        {id: 1, start: 20, end: 50},
-        {id: 2, start: 30, end: 50},
-        {id: 3, start: 40, end: 70},
-        {id: 4, start: 60, end: 80},
-        {id: 5, start: 80, end: 90}
-      ];
-
       var events = [
         {id: 0, start: 30, end: 150},
         {id: 1, start: 540, end: 600},
@@ -44,7 +21,42 @@
   </script>
 
   <body>
-    <div id='calendar'>
+    <div id='header'></div>
+
+    <div id='container'>
+      <div id='calendarTimes'>
+        <ul>
+          <li><span class='main'>9:00</span> AM</li>
+          <li><span class='main'>&nbsp;</span>9:30</li>
+          <li><span class='main'>10:00</span> AM</li>
+          <li><span class='main'>&nbsp;</span>10:30</li>
+          <li><span class='main'>11:00</span> AM</li>
+          <li><span class='main'>&nbsp;</span>11:30</li>
+          <li><span class='main'>12:00</span> PM</li>
+          <li><span class='main'>&nbsp;</span>12:30</li>
+          <li><span class='main'>1:00</span> PM</li>
+          <li><span class='main'>&nbsp;</span>1:30</li>
+          <li><span class='main'>2:00</span> PM</li>
+          <li><span class='main'>&nbsp;</span>2:30</li>
+          <li><span class='main'>3:00</span> PM</li>
+          <li><span class='main'>&nbsp;</span>3:30</li>
+          <li><span class='main'>4:00</span> PM</li>
+          <li><span class='main'>&nbsp;</span>4:30</li>
+          <li><span class='main'>5:00</span> PM</li>
+          <li><span class='main'>&nbsp;</span>5:30</li>
+          <li><span class='main'>6:00</span> PM</li>
+          <li><span class='main'>&nbsp;</span>6:30</li>
+          <li><span class='main'>7:00</span> PM</li>
+          <li><span class='main'>&nbsp;</span>7:30</li>
+          <li><span class='main'>8:00</span> PM</li>
+          <li><span class='main'>&nbsp;</span>8:30</li>
+          <li><span class='main'>9:00</span> PM</li>
+        </ul>
+      </div>
+      <div id='calendar'>
+      </div>
     </div>
+
+
   </body>
 </html>

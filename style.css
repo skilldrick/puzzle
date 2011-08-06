@@ -1,0 +1,73 @@
+body {
+  font-family: "lucida grande",tahoma,verdana,arial,sans-serif
+}
+
+#header {
+  width: 960px;
+  margin-left: 10px;
+  border-radius: 2px;
+  border: 1px solid #3159aa;
+  height: 25px;
+  background: #4b6ea8 url('fb_logo.png') no-repeat 8px 3px;
+}
+
+#container {
+  margin-top: 50px;
+}
+
+#calendarTimes {
+  margin: -10px 10px 0 0;
+  width: 70px;
+  float: left;
+}
+
+#calendarTimes ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: right;
+  color: #a7a7a7;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+#calendarTimes li {
+  height: 30px;
+}
+
+#calendarTimes .main {
+  color: #686868;
+  font-size: 14px;
+}
+
+
+#calendar {
+  float: left;
+  width: 620px;
+  height: 720px;
+  background-color: #ececec;
+  position: relative;
+}
+
+.event {
+  background-color: white;
+  position: absolute;
+  border: 1px solid #d5d5d5;
+  border-left: 4px solid #4b6ea9;
+}
+
+.event .title {
+  color: #4b6ea9;
+  font-size: 13px;
+  font-weight: bold;
+  margin-left: 5px;
+  margin-top: 5px;
+  margin-bottom: 2px;
+}
+
+.event .location {
+  color: #797979;
+  font-size: 10px;
+  margin-left: 5px;
+  margin-top: 2px;
+}

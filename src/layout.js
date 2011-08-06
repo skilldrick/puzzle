@@ -35,10 +35,14 @@ function render(events) {
   $calendar.empty();
   _.each(events, function (event) {
     var $ev = $('<div class="event" />');
-    $ev.css('height', event.end - event.start);
-    $ev.css('width', event.width() - 5);
-    $ev.css('top', event.start);
-    $ev.css('left', event.left() + 10);
+    $ev.css({
+      height: event.end - event.start,
+      width: event.width() - 5,
+      top: event.start,
+      left: event.left() + 10
+    });
+    $ev.append('<p class="title">Sample Item</p>');
+    $ev.append('<p class="location">Sample Location</p>');
     $calendar.append($ev);
   });
 }
