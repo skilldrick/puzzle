@@ -14,6 +14,25 @@ positions set, In addition to start time, end time, and id.
 **/
 
 function layOutDay(rawEvents) {
+  /*
+  This algorithm works like so:
+  1. Put the events in order
+  2. Give each event a list of earlier events it collides with in time
+  3. Tell each event to find its correct location
+    a) Set the event's width to the width of its colliders
+    b) Try the event in all possible horizontal locations. If it fits,
+    leave it there
+    c) If it doesn't fit in any, reduce the width of this event and
+    all previous events it collides with (and the events that those
+    events collide with, recursively), then do b) again
+  
+  The width and left edge of each event is calculated lazily from the
+  order and widthDivisor of that event. The order is the 'column' the
+  event is in, and the widthDivisor is the proportion of the full
+  width. Because all events in a colliding group have the same width, we
+  don't have to recalculate the width and left edge each time the
+  number of events in a row changes.
+  */
   if (!_.isArray(rawEvents)) {
     throw new TypeError('Events must be an array');
   }
@@ -29,7 +48,8 @@ function layOutDay(rawEvents) {
   //Tell each event to find its correct location
   _.invoke(events, 'findCorrectLocation');
 
-  return _.map(events, eventSimplifier);
+  //Should return an array of simple error objects
+  return _.invoke(events, 'simplify');
 }
 
 function render(events) {
@@ -52,17 +72,6 @@ function render(events) {
 /**
 Helper functions
 **/
-
-//Turn an intelligent event object into a simple hash
-function eventSimplifier(event) {
-  return {
-    width: event.width(),
-    left: event.left(),
-    start: event.start,
-    end: event.end,
-    id: event.id
-  };
-}
 
 function setCollidesWith(events) {
   _.each(events, function (event, idx) {
@@ -154,13 +163,14 @@ function EventMaker(rawEvent) {
       }, this);
     },
 
-    //These are the events that (a) this event collides with in time
-    //and (b) the colliders collide with. All events in a colliding
-    //group should be the same width
+    //These are the previous events that (a) this event collides with
+    //in time and (b) the colliders collide with. All events in a
+    //colliding group should be the same width
     collidingGroup: function () {
       var allColliders = _.map(this.previousColliders, function (item) {
         return item.collidingGroup();
       });
+      //this will be a nested array with dupes so flatten and uniq
       allColliders = _(allColliders).chain().flatten().uniq().value();
       allColliders.push(this);
       return allColliders;
@@ -193,8 +203,10 @@ function EventMaker(rawEvent) {
     },
 
     //This is called on each event. It tries all the possible
-    //locations for the event until one fits. Order always starts
-    //at 0, and widthDivisor at 1, so we can make certain assumptions
+    //locations for the event until one fits. If that doesn't work
+    //it reduces the width of all the events in the colliding group,
+    //then tries to fit it again. If *that* doesn't work then there's
+    //an error in the algorithm, so throw an error.
     findCorrectLocation: function () {
       //event's width should match its colliders
       this.setWidthToColliders();
@@ -211,6 +223,16 @@ function EventMaker(rawEvent) {
       }
 
       throw "Shouldn't get here!";
+    },
+
+    simplify: function () {
+      return {
+        width: this.width(),
+        left: this.left(),
+        start: this.start,
+        end: this.end,
+        id: this.id
+      };
     }
   };
 }

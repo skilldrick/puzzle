@@ -117,8 +117,9 @@ describe('EventMaker', function () {
   it('preserves start, end and id', function () {
     var rawEvent = { start: 10, end: 20, id: 2 };
     var event = EventMaker(rawEvent);
-    expect(event.start).toEqual(rawEvent.start);
-    expect(event.end).toEqual(rawEvent.end);
-    expect(event.id).toEqual(rawEvent.id);
+    var simplified = event.simplify();
+    expect(simplified.start).toEqual(rawEvent.start);
+    expect(simplified.end).toEqual(rawEvent.end);
+    expect(simplified.id).toEqual(rawEvent.id);
   });
 });
