@@ -36,6 +36,22 @@ describe('spaceCollision', function () {
   });
 });
 
+describe('Event#collidingGroup', function () {
+  it('returns a list of all previous colliders', function () {
+    var rawEvents = [
+      {start: 0, end: 30},
+      {start: 40, end: 70},
+      {start: 60, end: 90},
+      {start: 80, end: 100}
+    ];
+    var events = _.map(rawEvents, EventMaker);
+    setCollidesWith(events);
+    var colliders = events[3].collidingGroup();
+    console.log(colliders);
+    expect(colliders.length).toEqual(3);
+  });
+});
+
 describe('timeCollision', function () {
   it('requires two event objects', function () {
     expect(function () {

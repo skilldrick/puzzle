@@ -20,29 +20,62 @@ function layOutDay(rawEvents) {
   rawEvents = sortByStartAndEnd(rawEvents);
 
   // create event objects
-  var events = _.map(rawEvents, function (event) {
-    return EventMaker(event);
-  });
+  var events = _.map(rawEvents, EventMaker);
 
   //Tell each event which earlier events it collides with
-  _.each(events, function (event, idx) {
-    var prevEvents = _.first(events, idx); //first n events
-
-    _.each(prevEvents, function (prevEvent) {
-      if (timeCollision(prevEvent, event)) {
-        event.collidesWith.push(prevEvent);
-      }
-    });
-  });
+  setCollidesWith(events);
 
   _.each(events, function (event, idx) {
     if (idx === 0) {
       return;
     }
+
+    //event's width should match its colliders
+    if (event.collidesWith.length > 0) {
+      event.widthFactor = event.collidesWith[0].widthFactor;
+    }
+    //if event fits
+    if (! event.willCollideInSpace()) {
+      return;
+    }
+    //otherwise
+    //check if it fits at any other order
+    var itFits = _.any(_.range(event.widthFactor - 1), function (order) {
+      event.order = order;
+      return _.all(event.collidesWith, function (other) {
+        //at this order it fits!
+        return ! spaceCollision(event, other);
+      });
+    });
+    
+    if (itFits) {
+      return;
+    }
+    //otherwise:
+    //go through each event in colliding group and reduce its size
+    _.each(event.collidingGroup(), function (event) {
+      event.widthFactor += 1;
+    });
+
+    itFits = _.any(_.range(event.widthFactor), function (order) {
+      event.order = order;
+      return _.all(event.collidesWith, function (other) {
+        //at this order it fits!
+        return ! spaceCollision(event, other);
+      });
+    });
+    
+    if (itFits) {
+      return;
+    }
+
+    throw "Shouldn't get here!";
+
   });
 
 
   console.log(events);
+  return events;
 
   //
   //xxx
@@ -61,24 +94,40 @@ function layOutDay(rawEvents) {
 
 function render(events) {
   $calendar = $('#calendar');
-  $ev1 = $('<div class="event" />');
-  $ev1.css('height', 100);
-  $ev2 = $('<div class="event" />');
-  $ev2.css('height', 75);
-  $calendar.append($ev1);
-  $calendar.append($ev2);
+  $calendar.empty();
+  _.each(events, function (event) {
+    var $ev = $('<div class="event" />');
+    $ev.css('height', event.end - event.start);
+    $ev.css('width', event.width() - 5);
+    $ev.css('top', event.start);
+    $ev.css('left', event.left() + 10);
+    $calendar.append($ev);
+  });
 }
 
 /**
 Helper functions
 **/
 
+function setCollidesWith(events) {
+  _.each(events, function (event, idx) {
+    var prevEvents = _.first(events, idx); //first n events
+
+    _.each(prevEvents, function (prevEvent) {
+      if (timeCollision(prevEvent, event)) {
+        event.collidesWith.push(prevEvent);
+      }
+    });
+  });
+}
+
 function timeCollision(event1, event2) {
   if (!isEvent(event1) || !isEvent(event2)) {
     throw new TypeError('Both arguments must be events');
   }
 
-  return event1.end > event2.start && event1.start < event2.end
+  return event1.end > event2.start &&
+    event1.start < event2.end
 }
 
 function spaceCollision(event1, event2) {
@@ -86,7 +135,8 @@ function spaceCollision(event1, event2) {
     return false;
   }
 
-  return event1.right() > event2.left() && event1.left() < event2.right();
+  return event1.right() > event2.left() &&
+    event1.left() < event2.right();
 }
 
 function isEvent(event) {
@@ -131,6 +181,19 @@ function EventMaker(rawEvent) {
     right: function () {
       return this.left() + this.width();
     },
-    collidesWith: []
+    collidesWith: [],
+    willCollideInSpace: function () { //will collide in space
+      return _.any(this.collidesWith, function (other) {
+        return spaceCollision(this, other);
+      }, this);
+    },
+    collidingGroup: function () {
+      var allColliders = _.map(this.collidesWith, function (item) {
+        return item.collidingGroup();
+      });
+      allColliders = _(allColliders).chain().flatten().uniq().value();
+      allColliders.push(this);
+      return allColliders;
+    }
   };
 }
